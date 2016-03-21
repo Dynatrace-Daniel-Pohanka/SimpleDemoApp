@@ -14,7 +14,7 @@
     <path refid="classpath.base" />
   </path>
 
-  <target name="test" depends="run, junitreport, clean" />
+  <target name="test" depends="run, clean" />
 
   <target name="compile">
     <mkdir dir="${main.build.dir}"/>
@@ -46,15 +46,6 @@
         </batchtest>
     </junit>
   </target>
-	
-  	<target name="junitreport">
-	        <junitreport todir="${test.build.dir}">
-	            <fileset dir="${test.src.dir}">
-	                <include name="TEST-*.xml"/>
-	            </fileset>
-	            <report format="frames" todir="${test.build.dir}"/>
-	        </junitreport>
-	</target>
    
   <!-- delete all class files -->
   <!-- To run this: use "ant clean" -->
