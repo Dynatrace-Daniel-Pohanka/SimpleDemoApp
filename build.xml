@@ -4,26 +4,126 @@
   <property name="main.src.dir" value="src" />
   <property name="test.build.dir" value="build/test" />
   <property name="test.src.dir" value="test" />
-
+  
+	  <!-- Settings for dT Server Connection (also in dtTask.xml) -->
+	<property name="dynatrace.server.proto" value="https" />
+	<property name="dynatrace.server.name" value="localhost" />
+	<property name="dynatrace.server.port" value="8021" />
+	<property name="dynatrace.server.user" value="admin" />
+	<property name="dynatrace.server.pass" value="admin" />
+	
+	  <!-- Setting defaults for Test Automation -->
+	<property name="dtVersionMajor" value="1" />
+	<property name="dtVersionMinor" value="0" />
+	<property name="dtVersionRevision" value="0" />
+	<property name="dtVersionMilestone" value="Milestone 1" />
+	<property name="dtVersionBuild" value="124" />
+	<property name="dtTestCategory" value="performance" /> <!-- use one of [unit, uidriven, performance, load, webapi] -->
+	<property name="dtTestMarker" value="Milestone 1" />
+	<property name="dtAgentGroup" value="GoSpaceFrontend" />
+	<property name="dtBaseDir" value="lib/dynaTrace" />
+	<import file="lib/dynaTrace/dtTaskDefs.xml"/>
+	
+	<!-- required to build the agent connection string -->
+	<property name="dynatrace.agent.group" value="AntTest" />
+	<property name="dynatrace.profile.name" value="SimpleWebApp-Ant" />
+	<property name="dynatrace.collector" value="localhost:9998" />
+	<property name="dtagent" 
+		value="-agentpath:C:\Program Files\dynaTrace\Dynatrace 6.3\agent\lib64\dtagent.dll=
+		name=${dynatrace.agent.group}_${dynatrace.profile.name},server=${dynatrace.collector}" />
+	
+	<!-- version control -->
+	<property name="version.file" location="${basedir}/version.properties"/>
+	
   <path id="classpath.base" />
-
   <path id="classpath.test">
     <pathelement location="lib/junit-4.11.jar" />
     <pathelement location="lib/hamcrest-core-1.3.jar" />
     <pathelement location="${main.build.dir}"/>
     <path refid="classpath.base" />
   </path>
+  
+	<!-- version control Targets-->
+	<target name="inc.revision.properties" unless="no.increment.revision">
+	        <propertyfile file="${version.file}">
+	            <entry key="minor.number" default="00" operation="=" pattern="00" type="int"/>
+	            <entry key="major.number" default="00" operation="=" pattern="00" type="int"/>
+	            <entry key="build.number" default="00" operation="+" pattern="00" type="int"/>
+	        </propertyfile>
+	    </target>
 
-  <target name="test" depends="run, clean" />
+	    <target name="inc.minor.properties" unless="no.increment.minor">
+	        <propertyfile file="${version.file}">
+	            <entry key="minor.number" default="00" operation="+" pattern="00" type="int"/>
+	            <entry key="major.number" default="00" operation="=" pattern="00" type="int"/>
+	            <entry key="build.number" value="00" operation="="  type="int"/>
+	        </propertyfile>
+	    </target>
 
-  <target name="compile">
+	    <target name="inc.major" if="inc.major">
+	        <property name="no.increment.minor" value="true" />
+	        <property name="no.increment.revision" value="true" />
+	        <propertyfile file="${version.file}">
+	            <entry key="minor.number" value="00" operation="=" pattern="00" type="int"/>
+	            <entry key="major.number" default="00" operation="+" pattern="00" type="int"/>
+	            <entry key="build.number" value="00" operation="=" pattern="00" type="int"/>
+	        </propertyfile>
+	        <load.version.info/>
+	    </target>
+
+	    <target name="inc.minor" depends="inc.major,inc.minor.properties">
+	        <property name="no.increment.revision" value="true"/>
+	        <load.version.info/>
+	    </target>
+
+	    <target name="inc.revision" depends="inc.major,inc.revision.properties">
+	        <load.version.info/>
+	    </target>
+
+	    <macrodef name="load.version.info">
+	        <sequential>
+	            <property file="${version.file}"/>
+	            <checksum file="${version.file}" property="sha1.number" algorithm="SHA" format="CHECKSUM"/>
+	            <echo>Version: ${major.number}.${minor.number}.${build.number}</echo>
+	            <echo>SHA1: ${sha1.number}</echo>
+	        </sequential>
+	    </macrodef>
+  
+	<!-- Sets Test Meta Data Information for Test Automation -->
+	<!-- Use the debug flag for more log-output -->
+	<target name="StartTestForCategorizedTest">
+		<DtStartTest
+			versionMajor="${major.number}"
+			versionMinor="${minor.number}"
+			versionBuild="${build.number}"
+			category="${dtTestCategory}"
+			debug="true"/>
+
+		<echo>TestrunID: ${dtTestrunID}</echo>
+		<!-- 
+			 after registering a test run, you need to pass the dtTestrunID as an additional
+			 parameter to the agent injected into the JVM that's executing the tests.
+			 The following example assumes that dtagent property already holds basic agent
+			 definition and parameters, dtTestrunID is added as an extra parameter
+		-->
+		<!--
+		<junit fork="yes">
+			<jvmarg value="${dtagent},optionTestRunIdJava=${dtTestrunID}" />
+			...
+		</junit>
+		-->
+	</target>
+
+  <target name="test" depends="compile, StartTestForCategorizedTest, run, clean" />
+
+  <target name="compile" depends="inc.revision">
     <mkdir dir="${main.build.dir}"/>
     <javac srcdir="${main.src.dir}" destdir="${main.build.dir}" includeantruntime="false">
       <classpath refid="classpath.base"/>
     </javac>
   </target>
 
-  <target name="build" depends="compile">
+  <target name="build" depends="inc.minor, compile">
     <mkdir dir="${test.build.dir}"/>
     <javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
         <classpath refid="classpath.test"/>
@@ -34,13 +134,13 @@
   <!-- Test and build all files  -->
   <!-- To run this: use "ant" (default) or "ant run" -->
   <target name="run" depends="build">
-    <junit printsummary="on" haltonfailure="yes">
+    <junit printsummary="on" fork="yes" haltonfailure="yes">
+		<jvmarg value="${dtagent},optionTestRunIdJava=${dtTestrunID}" />
         <classpath>
           <path refid="classpath.test" />
           <pathelement location="${test.build.dir}"/>
         </classpath>
-        <!--formatter type="brief" usefile="false" /-->
-    	<formatter type="xml"/>
+	   	<formatter type="xml"/> <!--formatter type="brief" usefile="false" /-->
         <batchtest>
             <fileset dir="${test.src.dir}" includes="**/*Test*.java" />
         </batchtest>
