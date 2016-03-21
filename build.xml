@@ -45,6 +45,15 @@
         </batchtest>
     </junit>
   </target>
+	
+  	<target name="junitreport">
+	        <junitreport todir="${test.build.dir}">
+	            <fileset dir="${test.build.dir}">
+	                <include name="TEST-*.xml"/>
+	            </fileset>
+	            <report format="frames" todir="${junit.output.dir}"/>
+	        </junitreport>
+	</target>
    
   <!-- delete all class files -->
   <!-- To run this: use "ant clean" -->
