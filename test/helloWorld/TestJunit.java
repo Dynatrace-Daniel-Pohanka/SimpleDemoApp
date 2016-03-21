@@ -14,4 +14,11 @@ public class TestJunit {
    public void testPrintMessage() {	  
       assertEquals(message,messageUtil.printMessage());
    }
+   
+   @Test
+   public void testPrintEmptyMessage() {
+	  message ="";
+	  messageUtil = new MessageUtil(message);
+      assertEquals(message,messageUtil.printMessage());
+   }
 }
