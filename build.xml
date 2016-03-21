@@ -14,7 +14,7 @@
     <path refid="classpath.base" />
   </path>
 
-  <target name="test" depends="run, clean" />
+  <target name="test" depends="run, junitreport, clean" />
 
   <target name="compile">
     <mkdir dir="${main.build.dir}"/>
@@ -51,7 +51,7 @@
 	            <fileset dir="${test.build.dir}">
 	                <include name="TEST-*.xml"/>
 	            </fileset>
-	            <report format="frames" todir="${junit.output.dir}"/>
+	            <report format="frames" todir="${test.build.dir}"/>
 	        </junitreport>
 	</target>
    
