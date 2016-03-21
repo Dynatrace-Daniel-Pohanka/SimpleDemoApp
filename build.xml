@@ -39,7 +39,8 @@
           <path refid="classpath.test" />
           <pathelement location="${test.build.dir}"/>
         </classpath>
-        <formatter type="brief" usefile="false" />
+        <!--formatter type="brief" usefile="false" /-->
+    	<formatter type="xml"/>
         <batchtest>
             <fileset dir="${test.src.dir}" includes="**/*Test*.java" />
         </batchtest>
@@ -48,7 +49,7 @@
 	
   	<target name="junitreport">
 	        <junitreport todir="${test.build.dir}">
-	            <fileset dir="${test.build.dir}">
+	            <fileset dir="${test.src.dir}">
 	                <include name="TEST-*.xml"/>
 	            </fileset>
 	            <report format="frames" todir="${test.build.dir}"/>
