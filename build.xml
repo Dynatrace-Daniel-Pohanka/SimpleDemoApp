@@ -88,13 +88,12 @@
 	    </macrodef>
 	-->  
 	<!-- Sets Test Meta Data Information for Test Automation -->
-	<echo>
-		message="bamboo.buildKey = ${build.key}"
-		message="bamboo.buildNumber = ${bamboo.buildNumber}"
-	</echo>
-		
 	<!-- Use the debug flag for more log-output -->
 	<target name="StartTestForCategorizedTest">
+		
+		<echo>bamboo.buildKey: ${build.key}</echo>
+		<echo>bamboo.buildNumber: ${bamboo.buildNumber}</echo>
+		
 		<DtStartTest
 			versionBuild="${build.key}"
 			category="performance"
