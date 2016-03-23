@@ -9,6 +9,8 @@ public class MessageUtil {
    //@param message to be printed
    public MessageUtil(String message){
       this.message = message;
+	  if (message.equals(""))
+		  throw new IllegalArgumentException("Name has no content.");
    }
       
    // prints the message
