@@ -19,8 +19,6 @@
 	<property name="dtVersionMilestone" value="Milestone 1" />
 	<property name="dtVersionBuild" value="124" />
 	<property name="dtTestCategory" value="performance" /> <!-- use one of [unit, uidriven, performance, load, webapi] -->
-	<property name="dtTestMarker" value="Milestone 1" />
-	<property name="dtAgentGroup" value="GoSpaceFrontend" />
 	<property name="dtBaseDir" value="lib/dynaTrace" />
 	<import file="lib/dynaTrace/dtTaskDefs.xml"/>
 	
@@ -43,7 +41,7 @@
     <path refid="classpath.base" />
   </path>
   
-	<!-- version control Targets-->
+	<!-- version control Targets
 	<target name="inc.revision.properties" unless="no.increment.revision">
 	        <propertyfile file="${version.file}">
 	            <entry key="minor.number" default="00" operation="=" pattern="00" type="int"/>
@@ -88,15 +86,13 @@
 	            <echo>SHA1: ${sha1.number}</echo>
 	        </sequential>
 	    </macrodef>
-  
+	-->  
 	<!-- Sets Test Meta Data Information for Test Automation -->
 	<!-- Use the debug flag for more log-output -->
 	<target name="StartTestForCategorizedTest">
 		<DtStartTest
-			versionMajor="${major.number}"
-			versionMinor="${minor.number}"
-			versionBuild="${build.number}"
-			category="${dtTestCategory}"
+			versionBuild="${build.key}"
+			category="performance"
 			debug="true"/>
 
 		<echo>TestrunID: ${dtTestrunID}</echo>
@@ -116,14 +112,14 @@
 
   <target name="test" depends="compile, StartTestForCategorizedTest, run, clean" />
 
-  <target name="compile" depends="inc.revision">
+  <target name="compile">
     <mkdir dir="${main.build.dir}"/>
     <javac srcdir="${main.src.dir}" destdir="${main.build.dir}" includeantruntime="false">
       <classpath refid="classpath.base"/>
     </javac>
   </target>
 
-  <target name="build" depends="inc.minor, compile">
+  <target name="build" depends="compile">
     <mkdir dir="${test.build.dir}"/>
     <javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
         <classpath refid="classpath.test"/>
