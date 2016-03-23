@@ -88,6 +88,11 @@
 	    </macrodef>
 	-->  
 	<!-- Sets Test Meta Data Information for Test Automation -->
+	<echo>
+		message="bamboo.buildKey = ${build.key}"
+		message="bamboo.buildNumber = ${bamboo.buildNumber}"
+	</echo>
+		
 	<!-- Use the debug flag for more log-output -->
 	<target name="StartTestForCategorizedTest">
 		<DtStartTest
@@ -96,6 +101,7 @@
 			debug="true"/>
 
 		<echo>TestrunID: ${dtTestrunID}</echo>
+		
 		<!-- 
 			 after registering a test run, you need to pass the dtTestrunID as an additional
 			 parameter to the agent injected into the JVM that's executing the tests.
